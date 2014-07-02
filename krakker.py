@@ -36,13 +36,13 @@ def constructPotentialTrades(assetpairs, tickers):
         assetpair = k
         tickerforpair = tickers[k]
         #print(tickerforpair)
-        ask = Decimal(tickerforpair['a'][0])
-        bid = Decimal(tickerforpair['b'][0])
+        ask = float(tickerforpair['a'][0])
+        bid = float(tickerforpair['b'][0])
         base = v['base']
         quote = v['quote']
-        if bid == Decimal(0.0):
-            bid = Decimal(0.000000000001)
-        trade1 = (base, quote, Decimal(1.0)/bid)
+        if bid == float(0.0):
+            bid = float(0.000000000001)
+        trade1 = (base, quote, float(1.0)/bid)
         trades.append(trade1)
         trade2 = (quote, base, ask)
         trades.append(trade2)
@@ -61,7 +61,7 @@ def turnTradesIntoTableBlah(trades):
 def executeTrade(assetAmount, price):
     if price == 0.0:
         return "DIV0"
-    if type(assetAmount) is not Decimal:
+    if type(assetAmount) is not float:
         # Pass through error values
         return assetAmount
     else:
@@ -135,7 +135,7 @@ def main():
     pairs = assetPairs.keys()
     tickers = getTickers(k, pairs)
     print('-----------TICKERS-----------------------')
-    formstr = "{:<10}{:>5}{:>45}"
+    formstr = "{:<10}{:<10}{:>45}"
     print(formstr.format("Ticker", "Bid", "Ask"))
     for key, val in tickers.items():
         bid = val['b'][0]
@@ -159,30 +159,31 @@ def main():
     for result in tradeResults:
         asset1, asset2, asset3, amount = result
         print("{} -> {} -> {} ==> {}".format(asset1, asset2, asset3, amount))
-        if type(amount) is not Decimal:
+        if type(amount) is not float:
             anomalies.append(result)
-        elif amount >= Decimal(1.0):
+        elif amount >= float(1.0):
             profitableResults.append(amount)
 
     print('-----------PROFITABLE TRADES-------------')
     for asset1, asset2, asset3, result in profitableResults:
         print("{} -> {} -> {} ==> {}".format(asset1, asset2, asset3, result))
 
-    print('-----------ANOMALOUS RESULTS-------------')
-    def findTrade(asset1, asset2, trades):
-        def _search(t):
-            base, quote, _ = t
-            return base == asset1 and quote == asset2
-        return next((x for x in trades if _search(x)), (asset1, asset2, "INVALID_TRADE"))
+    if False:
+        print('-----------ANOMALOUS RESULTS-------------')
+        def findTrade(asset1, asset2, trades):
+            def _search(t):
+                base, quote, _ = t
+                return base == asset1 and quote == asset2
+                return next((x for x in trades if _search(x)), (asset1, asset2, "INVALID_TRADE"))
 
-    #for asset1, asset2, asset3, result in anomalies:
-    #    print("{} -> {} -> {} ==> {}".format(asset1, asset2, asset3, result))
-    #    t1 = findTrade(asset1, asset2, trades)
-    #    t2 = findTrade(asset2, asset3, trades)
-    #    t3 = findTrade(asset3, asset1, trades)
-    #    print(t1)
-    #    print(t2)
-    #    print(t3)
+        for asset1, asset2, asset3, result in anomalies:
+            print("{} -> {} -> {} ==> {}".format(asset1, asset2, asset3, result))
+            t1 = findTrade(asset1, asset2, trades)
+            t2 = findTrade(asset2, asset3, trades)
+            t3 = findTrade(asset3, asset1, trades)
+            print(t1)
+            print(t2)
+            print(t3)
 
 if __name__ == '__main__':
     main()
